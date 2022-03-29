@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import "package:flutter/material.dart";
-
 import '../helpers/contact_helper.dart';
 
-class ContactPage extends StatefulWidget {
+import 'image_source_sheet.dart';
 
+class ContactPage extends StatefulWidget {
   final Contact? contact;
 
   const ContactPage({Key? key, this.contact}) : super(key: key);
@@ -49,9 +49,9 @@ class _ContactPageState extends State<ContactPage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            if(_editedContact.name != "" && _editedContact.name != null){
-                Navigator.pop(context, _editedContact);
-            }else{
+            if (_editedContact.name != "" && _editedContact.name != null) {
+              Navigator.pop(context, _editedContact);
+            } else {
               FocusScope.of(context).requestFocus(_nameFocus);
             }
           },
@@ -69,13 +69,26 @@ class _ContactPageState extends State<ContactPage> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: _editedContact.img != null
-                          ? FileImage(File(_editedContact.img!))
-                          : const AssetImage("images/person.png")
-                              as ImageProvider,
-                    ),
+                        image: _editedContact.img != null
+                            ? FileImage(File(_editedContact.img!))
+                            : const AssetImage("images/person.png")
+                                as ImageProvider,
+                        fit: BoxFit.cover
+                        ),
                   ),
                 ),
+                onTap: () async {
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (context) => ImageSourceSheet(
+                            onImageSelected: (image) {
+                              setState(() {
+                                _editedContact.img = image.path;
+                                Navigator.pop(context);
+                              });
+                            },
+                          ));
+                },
               ),
               TextField(
                 controller: _nameController,
@@ -113,36 +126,32 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-
-  Future<bool> _requestPop(){
-    if(_userEdited){
+  Future<bool> _requestPop() {
+    if (_userEdited) {
       showDialog(
           context: context,
-          builder: (context){
+          builder: (context) {
             return AlertDialog(
               title: const Text("Descartar alterações?"),
               content: const Text("Se sair, as alterações serão perdidas."),
               actions: [
                 TextButton(
-                    onPressed: (){
+                    onPressed: () {
                       Navigator.pop(context);
                     },
                     child: const Text("Cancelar")),
                 TextButton(
-                    onPressed: (){
+                    onPressed: () {
                       Navigator.pop(context);
                       Navigator.pop(context);
                     },
                     child: const Text("Sim"))
               ],
             );
-          }
-      );
+          });
       return Future.value(false);
-
-    }else{
+    } else {
       return Future.value(true);
     }
   }
-
 }
